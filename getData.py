@@ -97,7 +97,7 @@ final_data = "urlDataset.csv"
 #data_init(source,final_data)
 
 #Uncoment if needed to change portion of the initial dataset used
-percentage = 0.005
+percentage = 0.5
 data_init(source,final_data,percentage)
 
 data = load_processed_data(final_data)
