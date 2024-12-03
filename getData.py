@@ -61,11 +61,17 @@ def Shortening_Service(url):
     return int(any(service in url for service in malicious_shorteners))
 
 
-def feature_engineering_data(dataset):
+def feature_engineering_data(dataset,isbinary=0,average=None):
+    
     spec_chars = ['@','?','-','=','.','#','%','+','$','!','*',',','//']
 
     if not 'Length' in dataset:
-        dataset["Length"] = dataset['url'].apply(lambda x:len(str(x)))
+        if (isbinary==1):
+            average_length = (63.14+44.28)//2
+            #print(average_length)
+            dataset["Length"] = dataset['url'].apply(lambda x: 1 if (len(str(x))>average_length) else 0)
+        else:
+            dataset["Length"] = dataset['url'].apply(lambda x:len(str(x)))
 
     if not 'hasHTTPS' in dataset:
         dataset["hasHTTPS"] = dataset['url'].apply(lambda x: 1 if ("https://" in x) else 0)
@@ -74,11 +80,17 @@ def feature_engineering_data(dataset):
         dataset["hasHTTP"] = dataset['url'].apply(lambda x: 1 if ("http://" in x) else 0)
 
     if not 'nDigits' in dataset:
-        dataset["nDigits"] = dataset['url'].apply(lambda x: sum(1 for i in x if i.isnumeric()))
+        if (isbinary==1):
+            dataset["nDigits"] = dataset['url'].apply(lambda x: 1 if sum(1 for i in x if i.isnumeric())>average else 0)
+        else:
+            dataset["nDigits"] = dataset['url'].apply(lambda x: sum(1 for i in x if i.isnumeric()))
 
     for char in spec_chars:
         if not char in dataset:
-            dataset[char] = data['url'].apply(lambda i: i.count(char))
+            if (isbinary==1):
+                dataset[char] = dataset['url'].apply(lambda x: 1 if char in x else 0)
+            else:
+                dataset[char] = dataset['url'].apply(lambda i: i.count(char))
 
     if not 'hasIPaddress' in dataset:
         dataset['hasIPaddress'] = dataset['url'].apply(lambda i: having_ip_address(i))
@@ -93,15 +105,22 @@ def feature_engineering_data(dataset):
 source = "original_malicious_phish.csv"
 final_data = "urlDataset.csv"
 
+#https://www.researchgate.net/figure/Frequency-Distribution-of-URL-Length-Benign_fig1_360254493 -> VER PARA AVERAGE LENGTH URL
+#average_length = sum(data['url'].apply(lambda x:len(str(x))))//len(data)
+#print(average_length)
+
 #Uncomment if needed to load to the device or change initial dataset
 #data_init(source,final_data)
 
 #Uncoment if needed to change portion of the initial dataset used
-percentage = 0.5
+percentage = 1
 data_init(source,final_data,percentage)
 
 data = load_processed_data(final_data)
 
-feature_engineering_data(data)
+average = sum(data['url'].apply(lambda x: sum(1 for i in x if i.isnumeric())))//len(data)
+print(average)
+
+feature_engineering_data(data,1,average)
 save_processed_data(data,final_data)
 print(data.head(20))
