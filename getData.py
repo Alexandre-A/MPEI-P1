@@ -5,6 +5,16 @@ import re
 def data_init(source,output_file,percentage = 1):
     dataset = pd.read_csv(source)
     #print(dataset["type"].unique())
+
+    remWRONG = {"type": {"benign":"malign","phishing":"benign"}}
+    wrongly_labled_data = dataset.iloc[555186:]
+    #print(wrongly_labled_data.head(10))
+    #wrongly_labled_data.info()
+    wrongly_labled_data= wrongly_labled_data.replace(remWRONG)
+    #print(wrongly_labled_data.head(10))
+    dataset.iloc[555186:] = wrongly_labled_data
+    #print(dataset.iloc[555186:].head(10))
+
     if percentage < 1.0:
         rng = np.random.default_rng()  
         random_seed = rng.integers(0, 2**32) 
