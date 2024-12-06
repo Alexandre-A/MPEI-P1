@@ -22,6 +22,7 @@ def data_init(source,output_file,percentage = 1):
 
     # Adjusting the overall dataset to our needs
     dataset = dataset.dropna() #remove rows with null values
+    dataset = dataset[dataset['url'].apply(lambda x: len(str(x)) > 4)]
     if (source == "original_malicious_phish.csv"):
         rem = {"type": {"defacement":"malign","phishing":"malign","malware":"malign"}}
         
@@ -79,7 +80,7 @@ def feature_engineering_data(dataset,isbinary=0,average=None):
         if (isbinary==1):
             average_length = (63.14+44.28)//2
             #print(average_length)
-            dataset["Length"] = dataset['url'].apply(lambda x: 1 if (len(str(x))>average_length) else 0)
+            dataset["Length"] = dataset['url'].apply(lambda x: 1 if (len(str(x))>average_length) else 0) 
         else:
             dataset["Length"] = dataset['url'].apply(lambda x:len(str(x)))
 
@@ -123,6 +124,7 @@ final_data = "urlDataset.csv"
 #data_init(source,final_data)
 
 #Uncoment if needed to change portion of the initial dataset used
+#percentage = 0.005
 percentage = 1
 data_init(source,final_data,percentage)
 
@@ -131,6 +133,13 @@ data = load_processed_data(final_data)
 average = sum(data['url'].apply(lambda x: sum(1 for i in x if i.isnumeric())))//len(data)
 print(average)
 
+#For All Binary Features
 feature_engineering_data(data,1,average)
+
+#For Mixed Binary and Discrete Features
+#feature_engineering_data(data)
+
+#print(sorted(data["Length"].unique()))
+
 save_processed_data(data,final_data)
 print(data.head(20))
