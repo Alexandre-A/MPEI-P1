@@ -87,11 +87,11 @@ BF_malign = BloomInit(m_Malign);
 BF_benign = BloomInit(m_Benign);
 
 for i=1:length(Urls_MTr)
-    BF_malign = BloomAdd2(Urls_MTr{i},BF_malign,kOtimoM);
+    BF_malign = BloomAdd3(Urls_MTr{i},BF_malign,kOtimoM);
 end
 
 for i=1:length(Urls_BTr)
-    BF_benign = BloomAdd2(Urls_BTr{i},BF_benign,kOtimoB);
+    BF_benign = BloomAdd3(Urls_BTr{i},BF_benign,kOtimoB);
 end
 
 %% Naive bayes algorithm
@@ -102,8 +102,8 @@ contadorBenignos = 0;
 
 
 for i = 1:N_urlsTeste
-    result = BloomCheck(urls_test{i},BF_malign,kOtimoM);
-    result2 = BloomCheck2(urls_test{i},BF_benign,kOtimoB);
+    result = BloomCheck3(urls_test{i},BF_malign,kOtimoM);
+    result2 = BloomCheck3(urls_test{i},BF_benign,kOtimoB);
 
     if bitxor(result,result2) == 1
         if result == 1

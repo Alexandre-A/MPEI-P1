@@ -1,4 +1,7 @@
 function [out] = partialBayesClassifier(classes,selection,teste,trndat,words,binary)
+% Nota: não foi usada esta função (ainda) para a aplicação do NaiveBayes no
+% projeto, para ver implementação atual ver código do main.m ou testeNB.m
+
 %partialBayesClassifier - The Bayes classifier is the classifier having the 
 %   smallest probability of misclassification of all classifiers using the 
 %   same set of features. (Source: Wikipedia)
