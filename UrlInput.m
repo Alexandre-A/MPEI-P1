@@ -7,9 +7,13 @@ classesOutput = [];
 X = [];
 while 1
     url = inputdlg("Insira o url: ");
+    if isempty(url)  
+        break;
+    end
 
     % Requirements for NB/BF:
     if strcmp(modulo, 'NB') == 1
+        url = url{1};
         typeChoice = inputdlg("Insira o tipo (1 para maligno ou 2 para benigno):");
         type = '';
         while strcmp(typeChoice, '1') == 0 && strcmp(typeChoice, '2') == 0
@@ -19,9 +23,12 @@ while 1
             type = 'malign';
         elseif strcmp(typeChoice, '2') == 1
             type = 'benign';
+        else
+            continue;
         end
-        urlCharacteristics = [url type];
-        UrlOutput = [UrlOutput; urlCharacteristics];
+        
+        UrlOutput = [UrlOutput; {url, type}];
+
     elseif strcmp(modulo, 'BF') == 1
         typeChoice = inputdlg("Insira o tipo (1 para maligno ou 2 para benigno)");
         type = '';

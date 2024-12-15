@@ -1,5 +1,5 @@
 % Automatization of the gather of csv data
-
+%CORRIGIR ORDEM DESTA PARTE
 dataSetDate = datevec(dir('urlDataset.csv').date);
 matfileDate = datevec(dir('dados.mat').date);
 
@@ -31,22 +31,8 @@ classes_test = classes(shuffler(train_size:end));
 X_train = X(shuffler(1:train_size),:);
 X_test = X(shuffler(train_size:end),:);
 
-%------------------------------------------------------------------%
-
-%% NB implementation (preconditions)
 condMalign = classes_train == 'malign';
 condBenign = classes_train == 'benign';
-
-numM = sum(condMalign);
-numB = sum(condBenign);
-[n_ele_train,~] = size(X_train);
-
-P_M = numM/n_ele_train;
-P_B = numB/n_ele_train;
-
-non_zero_features = find(sum(X_train) ~= 0);
-X_Urls_MTr = X_train(condMalign,:);
-X_Urls_BTr = X_train(condBenign,:);
 
 Urls_MTr = urls_train(condMalign);
 Urls_BTr = urls_train(condBenign);
@@ -54,15 +40,34 @@ Urls_BTr = urls_train(condBenign);
 Urls_MTst = urls_test(classes_test == 'malign');
 Urls_BTst = urls_test(classes_test == 'malign');
 
+%------------------------------------------------------------------%
+
+%% NB implementation (preconditions)
+%{
+numM = sum(condMalign);
+numB = sum(condBenign);
+[n_ele_train,~] = size(X_train);
+
+P_M = numM/n_ele_train
+P_B = numB/n_ele_train
+
+non_zero_features = find(sum(X_train) ~= 0)
+X_Urls_MTr = X_train(condMalign,:);
+X_Urls_BTr = X_train(condBenign,:);
+
 
 ocorrenciaM = sum(X_Urls_MTr);
 ocorrenciaB = sum(X_Urls_BTr);
 
 total_Malign = sum(X_Urls_MTr(:));
-p_url_dado_M = (ocorrenciaM +1)/(total_Malign+size(X_train, 2));
+p_url_dado_M = (ocorrenciaM +1)/(total_Malign+size(X_train, 2))
 
 total_Benign = sum(X_Urls_BTr(:));
-p_url_dado_B = (ocorrenciaB+ 1)/(total_Benign + size(X_train, 2));
+p_url_dado_B = (ocorrenciaB+ 1)/(total_Benign + size(X_train, 2))
+%}
+binary_features = 1:length(features)
+[p_url_dado_M, p_url_dado_B, P_M, P_B, non_zero_features, ~] = ...
+    NaiveBayesTrain(X_train, classes_train, binary_features)
 
 %% Bloom Filters
 % Values Init
@@ -116,7 +121,8 @@ for i = 1:N_urlsTeste
             continue;
         end
     else
-
+        output_esperado = NaiveBayesOutput(i,non_zero_features,X_test,probsArray,probsArrayClasses,output_esperado);
+%{
         probM = log(P_M);
         probB = log(P_B);
 
@@ -135,6 +141,7 @@ for i = 1:N_urlsTeste
         else
             output_esperado = [output_esperado, 'benign'];
         end
+%}
     end
 end
 

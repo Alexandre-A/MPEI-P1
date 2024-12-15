@@ -75,14 +75,10 @@ def Shortening_Service(url):
 def feature_engineering_data(dataset,isbinary=0,average=None):
     #If dataset == pd.dataframe, deixar como está, se for string, criar um dataset
     # Para esse url
-    if type(dataset)==list:
-        urls = [dataset[i][0] for i in range(len(dataset)) if (dataset[i][1] == 'malign' or dataset[i][1] =='benign')]
-        classes = [dataset[i][1] for i in range(len(dataset)) if (dataset[i][1] == 'malign' or dataset[i][1] =='benign')]
-
-        dados = {'url':urls,'type':classes}
-        dataset = pd.DataFrame(dados)
+    
     
     spec_chars = ['@','?','-','=','.','#','%','+','$','!','*',',','//']
+    #                                              m   m   m
 
     if not 'Length' in dataset:
         if (isbinary==1):
@@ -123,33 +119,34 @@ def feature_engineering_data(dataset,isbinary=0,average=None):
 
     
 #-----------------------------------------------------#
-source = "original_malicious_phish.csv"
-final_data = "urlDataset.csv"
+if __name__ == "__main__":
+    source = "original_malicious_phish.csv"
+    final_data = "urlDataset.csv"
 
-#https://www.researchgate.net/figure/Frequency-Distribution-of-URL-Length-Benign_fig1_360254493 -> VER PARA AVERAGE LENGTH URL
-#average_length = sum(data['url'].apply(lambda x:len(str(x))))//len(data)
-#print(average_length)
+    #https://www.researchgate.net/figure/Frequency-Distribution-of-URL-Length-Benign_fig1_360254493 -> VER PARA AVERAGE LENGTH URL
+    #average_length = sum(data['url'].apply(lambda x:len(str(x))))//len(data)
+    #print(average_length)
 
-#Uncomment if needed to load to the device or change initial dataset
-#data_init(source,final_data)
+    #Uncomment if needed to load to the device or change initial dataset
+    #data_init(source,final_data)
 
-#Uncoment if needed to change portion of the initial dataset used
-#percentage = 0.05
-percentage = 1
-data_init(source,final_data,percentage)
+    #Uncoment if needed to change portion of the initial dataset used
+    percentage = 0.05
+    #percentage = 1
+    data_init(source,final_data,percentage)
 
-data = load_processed_data(final_data)
-#print(data.type.value_counts())
-average = sum(data['url'].apply(lambda x: sum(1 for i in x if i.isnumeric())))//len(data) #5 for the whole dataset
-print(average)
+    data = load_processed_data(final_data)
+    #print(data.type.value_counts())
+    average = sum(data['url'].apply(lambda x: sum(1 for i in x if i.isnumeric())))//len(data) #5 for the whole dataset
+    #print(average)
 
-#For All Binary Features
-feature_engineering_data(data,1,average)
+    #For All Binary Features
+    feature_engineering_data(data,1,average)
 
-#For Mixed Binary and Discrete Features
-#feature_engineering_data(data)
+    #For Mixed Binary and Discrete Features
+    #feature_engineering_data(data)
 
-#print(sorted(data["Length"].unique()))
+    #print(sorted(data["Length"].unique()))
 
-save_processed_data(data,final_data)
-print(data.head(20))
+    save_processed_data(data,final_data)
+    print(data.head(20))
