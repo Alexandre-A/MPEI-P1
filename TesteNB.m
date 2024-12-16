@@ -22,6 +22,10 @@ percent = 0.8;
 train_size = round(length(urls)*percent);
 shuffler = randperm(length(urls));
 
+%% 
+load('dados.mat')
+%%
+
 urls_train = urls(shuffler(1:train_size));
 urls_test = urls(shuffler(train_size:end));
 
@@ -65,9 +69,30 @@ total_Benign = sum(X_Urls_BTr(:));
 p_url_dado_B = (ocorrenciaB+ 1)/(total_Benign + size(X_train, 2));
 %}
 
-binary_features = 1:length(features)
+
+% Teste NBB
+binary_features = 1:length(features);
+
 [p_url_dado_M, p_url_dado_B, P_M, P_B, non_zero_features, ~] = ...
-    NaiveBayesTrain(X_train, classes_train, binary_features)
+  NaiveBayesTrain(X_train, classes_train, binary_features);
+
+
+%{
+% Teste NBMisto
+numeric_features = [1,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
+binary_features = setdiff(1:length(features),numeric_features);
+
+% Log transformation (handles skewed data)
+X_train(:, numeric_features) = log(X_train(:, numeric_features) + 1);
+X_test(:, numeric_features) = log(X_test(:, numeric_features) + 1);
+
+% Standardize features (zero mean, unit variance)
+X_train(:, numeric_features) = zscore(X_train(:, numeric_features));
+X_test(:, numeric_features) = zscore(X_test(:, numeric_features));
+
+[p_url_dado_M, p_url_dado_B, P_M, P_B, non_zero_features, stats] = ...
+    NaiveBayesTrain(X_train, classes_train, binary_features,numeric_features);
+%}
 %% Naive bayes algorithm -> Logic and testing
 %{
 output_esperado = {};
@@ -112,13 +137,14 @@ F1 = 2*precision2*recall/(precision2+recall)
 %}
 
 %%
-probsArray =[p_url_dado_B; p_url_dado_M]
-probsArrayClasses =[P_M;P_B]
+probsArray =[p_url_dado_B; p_url_dado_M];
+probsArrayClasses =[P_M;P_B];
 output_esperado = {};
 [urlsTeste,~] = size(urls_test);
 
 for i = 1:urlsTeste
     output_esperado = NaiveBayesOutput(i,non_zero_features,X_test,probsArray,probsArrayClasses,output_esperado);
+    %output_esperado = NaiveBayesOutput(i,non_zero_features,X_test,probsArray,probsArrayClasses,output_esperado,stats,'mixed',numeric_features);
 end
 output_esperado = output_esperado';
 

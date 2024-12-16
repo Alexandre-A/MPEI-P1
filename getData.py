@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
 import re
+import matplotlib.pyplot as plt
+import seaborn as sns
+import scipy.stats as stats
 
 def data_init(source,output_file,percentage = 1):
     dataset = pd.read_csv(source)
@@ -42,8 +45,7 @@ def load_processed_data(csv_file):
 def save_processed_data(dataset,csv_file):
     dataset.to_csv(csv_file, index=False)
 
-def having_ip_address(url):
-    # Regex for detecting IPv4 and IPv6 addresses (with ports or CIDR notation)
+def having_ip_address(url): # Inspirado por: https://www.kaggle.com/code/thisishusseinali/malicious-url-detection
     ip_regex = (
         r'(\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))'  # IPv4
         r'(\:\d+)?(\/\d{1,2})?\b|'  # Optional port or CIDR
@@ -52,7 +54,7 @@ def having_ip_address(url):
     )
     return 1 if re.search(ip_regex, url) else 0
 
-def Shortening_Service(url):
+def Shortening_Service(url): # Exemplos de shortening URLs inspirados/tirados de: https://www.kaggle.com/code/hamzamanssor/detection-malicious-url-using-ml-models
     shortening_services = [
         'bit.ly', 'goo.gl', 'shorte.st', 'go2l.ink', 'x.co', 'ow.ly', 't.co', 'tinyurl', 'tr.im', 'is.gd',
         'cli.gs', 'yfrog.com', 'migre.me', 'ff.im', 'tiny.cc', 'url4.eu', 'twit.ac', 'su.pr', 'twurl.nl',
@@ -76,9 +78,10 @@ def feature_engineering_data(dataset,isbinary=0,average=None):
     #If dataset == pd.dataframe, deixar como está, se for string, criar um dataset
     # Para esse url
     
-    
     spec_chars = ['@','?','-','=','.','#','%','+','$','!','*',',','//']
-    #                                              m   m   m
+
+    #spec_chars = ['@','?','-','=','.','%','+','!',',','//']
+    #                                                 m   m
 
     if not 'Length' in dataset:
         if (isbinary==1):
@@ -131,7 +134,8 @@ if __name__ == "__main__":
     #data_init(source,final_data)
 
     #Uncoment if needed to change portion of the initial dataset used
-    percentage = 0.05
+    percentage = 0.004
+    #percentage = 0.5
     #percentage = 1
     data_init(source,final_data,percentage)
 
@@ -141,12 +145,86 @@ if __name__ == "__main__":
     #print(average)
 
     #For All Binary Features
-    feature_engineering_data(data,1,average)
+    #feature_engineering_data(data,1,average)
 
     #For Mixed Binary and Discrete Features
-    #feature_engineering_data(data)
+    feature_engineering_data(data)
 
     #print(sorted(data["Length"].unique()))
 
     save_processed_data(data,final_data)
     print(data.head(20))
+
+'''
+# Function to visualize numeric feature distributions
+def plot_numeric_distributions(dataset, numeric_features):
+    for feature in numeric_features:
+        # Histogram
+        plt.figure(figsize=(12, 6))
+        plt.subplot(1, 2, 1)
+        sns.histplot(dataset[feature], kde=True, bins=30, color='blue')
+        plt.title(f"Histogram of {feature}")
+        plt.xlabel(feature)
+        plt.ylabel("Frequency")
+        
+        # Q-Q Plot
+        plt.subplot(1, 2, 2)
+        stats.probplot(dataset[feature], dist="norm", plot=plt)
+        plt.title(f"Q-Q Plot of {feature}")
+        
+        plt.tight_layout()
+        plt.show()
+
+# Select numeric features
+numeric_features = ['Length', 'nDigits','@','?','-','=','.','#','%','+','$','!','*',',','//']  # Add other numeric feature names here
+
+# Call the function to plot
+data_init(source,final_data,percentage)
+data = load_processed_data(final_data)
+feature_engineering_data(data)
+
+#plot_numeric_distributions(data, numeric_features)
+
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+
+def normalize_numeric_features(dataset, features, method="min-max"):
+    """
+    Normalize numeric features in the dataset using Min-Max Scaling or Z-Score Normalization.
+
+    Args:
+        dataset (pd.DataFrame): The dataset containing the features to normalize.
+        features (list): List of numeric feature names to normalize.
+        method (str): Normalization method. Options are "min-max" or "z-score".
+    
+    Returns:
+        pd.DataFrame: Dataset with normalized features.
+    """
+    normalized_dataset = dataset.copy()
+    
+    if method == "min-max":
+        scaler = MinMaxScaler()
+    elif method == "z-score":
+        scaler = StandardScaler()
+    else:
+        raise ValueError("Invalid method. Choose 'min-max' or 'z-score'.")
+    
+    # Apply the scaler to the selected features
+    normalized_values = scaler.fit_transform(normalized_dataset[features])
+    normalized_dataset[features] = normalized_values
+    
+    return normalized_dataset
+
+# List of numeric features to normalize
+numeric_features = ['Length', 'nDigits', '@', '?', '-', '=', '.', '#', '%', '+', '$', '!', '*', ',', '//']
+
+# Normalize the dataset
+normalized_data = normalize_numeric_features(data, numeric_features)
+
+# Save normalized dataset if needed
+save_processed_data(normalized_data, "normalized_" + final_data)
+
+# Display normalized data stats
+print(normalized_data[numeric_features].describe())
+plot_numeric_distributions(normalized_data, numeric_features)
+'''
+

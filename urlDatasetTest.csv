@@ -1,11 +1,3 @@
-url,type,Length,hasHTTPS,hasHTTP,nDigits,@,?,-,=,.,#,%,+,$,!,*,",",//,hasIPaddress,shorteningServices
-bit.ly/abc123,malign,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1
-https://github.com,benign,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0
-adf.ly/malicious-link,malign,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1
-example.com,benign,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
-http://short.to/phishing,malign,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0
- reddit.com,benign,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1
-ow.ly/spam-link,malign,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1
-https://openai.com,benign,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0
-malicious-site.net,malign,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0
-gov.uk,benign,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+url,type
+google.com,malign
+lmaondiadaoihsdaiohduahdwa,malign
