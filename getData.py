@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 import re
-import matplotlib.pyplot as plt
-import seaborn as sns
-import scipy.stats as stats
+#import matplotlib.pyplot as plt
+#import seaborn as sns
+#import scipy.stats as stats
 
 def data_init(source,output_file,percentage = 1):
     dataset = pd.read_csv(source)
@@ -125,6 +125,8 @@ def feature_engineering_data(dataset,isbinary=0,average=None):
 if __name__ == "__main__":
     source = "original_malicious_phish.csv"
     final_data = "urlDataset.csv"
+    final_data2 = "urlDatasetMisto.csv"
+
 
     #https://www.researchgate.net/figure/Frequency-Distribution-of-URL-Length-Benign_fig1_360254493 -> VER PARA AVERAGE LENGTH URL
     #average_length = sum(data['url'].apply(lambda x:len(str(x))))//len(data)
@@ -134,9 +136,27 @@ if __name__ == "__main__":
     #data_init(source,final_data)
 
     #Uncoment if needed to change portion of the initial dataset used
-    percentage = 0.004
+    #percentage = 0.04
     #percentage = 0.5
-    #percentage = 1
+    percentage = 1
+    data_init(source,final_data2,percentage)
+
+    data = load_processed_data(final_data2)
+    #print(data.type.value_counts())
+    average = sum(data['url'].apply(lambda x: sum(1 for i in x if i.isnumeric())))//len(data) #5 for the whole dataset
+    #print(average)
+
+    
+
+    #For Mixed Binary and Discrete Features
+    feature_engineering_data(data)
+
+    #print(sorted(data["Length"].unique()))
+
+    save_processed_data(data,final_data2)
+    print(data.head(20))
+
+    # Binary Dataset --------------------------------------------------------------------------------------------------------
     data_init(source,final_data,percentage)
 
     data = load_processed_data(final_data)
@@ -144,14 +164,9 @@ if __name__ == "__main__":
     average = sum(data['url'].apply(lambda x: sum(1 for i in x if i.isnumeric())))//len(data) #5 for the whole dataset
     #print(average)
 
+
     #For All Binary Features
-    #feature_engineering_data(data,1,average)
-
-    #For Mixed Binary and Discrete Features
-    feature_engineering_data(data)
-
-    #print(sorted(data["Length"].unique()))
-
+    feature_engineering_data(data,1,average)
     save_processed_data(data,final_data)
     print(data.head(20))
 
@@ -184,47 +199,5 @@ data = load_processed_data(final_data)
 feature_engineering_data(data)
 
 #plot_numeric_distributions(data, numeric_features)
-
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
-
-def normalize_numeric_features(dataset, features, method="min-max"):
-    """
-    Normalize numeric features in the dataset using Min-Max Scaling or Z-Score Normalization.
-
-    Args:
-        dataset (pd.DataFrame): The dataset containing the features to normalize.
-        features (list): List of numeric feature names to normalize.
-        method (str): Normalization method. Options are "min-max" or "z-score".
-    
-    Returns:
-        pd.DataFrame: Dataset with normalized features.
-    """
-    normalized_dataset = dataset.copy()
-    
-    if method == "min-max":
-        scaler = MinMaxScaler()
-    elif method == "z-score":
-        scaler = StandardScaler()
-    else:
-        raise ValueError("Invalid method. Choose 'min-max' or 'z-score'.")
-    
-    # Apply the scaler to the selected features
-    normalized_values = scaler.fit_transform(normalized_dataset[features])
-    normalized_dataset[features] = normalized_values
-    
-    return normalized_dataset
-
-# List of numeric features to normalize
-numeric_features = ['Length', 'nDigits', '@', '?', '-', '=', '.', '#', '%', '+', '$', '!', '*', ',', '//']
-
-# Normalize the dataset
-normalized_data = normalize_numeric_features(data, numeric_features)
-
-# Save normalized dataset if needed
-save_processed_data(normalized_data, "normalized_" + final_data)
-
-# Display normalized data stats
-print(normalized_data[numeric_features].describe())
-plot_numeric_distributions(normalized_data, numeric_features)
 '''
 
