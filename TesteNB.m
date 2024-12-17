@@ -7,17 +7,19 @@ else
 end
 %%
 % Automatization of the gather of csv data
-
+if ~isfile('dados.mat')
+    csv_extraction(ficheiro,'dados')
+else
 dataSetDate = datevec(dir(ficheiro).date);
 matfileDate = datevec(dir('dados.mat').date);
 
 comparison = ~(dataSetDate == matfileDate);
 difDateSet = dataSetDate(comparison);
 difMatFile = matfileDate(comparison);
-if (~isfile('dados.mat') || (difMatFile(1) < difDateSet(1))) 
+if (~isfile('dados.mat') || (difMatFile(1) < difDateSet(1)))
     csv_extraction(ficheiro,'dados')
 end
-
+end
 vars = {'dataSetDate','matfileDate','comparison','difDateSet','difMatFile'};
 clear(vars{:})
 %Disclaimer: In case this is executed, it can take up to 3 minutes 
@@ -70,10 +72,15 @@ numeric_features = [1,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
 binary_features = setdiff(1:length(features),numeric_features);
 
 % Log transformation 
+% A maioria dos dados numéricos está concentrada na "lower-end"
+% (right-skewed). por isso foi aplicada o log, para comprimir o range de
+% valores
 X_train(:, numeric_features) = log(X_train(:, numeric_features) + 1);
 X_test(:, numeric_features) = log(X_test(:, numeric_features) + 1);
 
 % Standardize features 
+% Faz com que os dados transformados apresentem média de 0 e desvio padrão
+% de 1, removendo diferenças de escalas
 X_train(:, numeric_features) = zscore(X_train(:, numeric_features));
 X_test(:, numeric_features) = zscore(X_test(:, numeric_features));
 
@@ -108,7 +115,7 @@ recall = (C(1))/ (C(1)+C(3))
 
 F1 = 2*precision2*recall/(precision2+recall)
 
-valuesOutputs = [valuesOutputs;accuracy precision2 recall F1];
+%valuesOutputs = [valuesOutputs;accuracy precision2 recall F1];
 %end
 %VALORES = round(valuesOutputs,4)
 %% Naive bayes algorithm -> Manual testing

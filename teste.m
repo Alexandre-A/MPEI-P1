@@ -1,5 +1,7 @@
 % Automatization of the gather of csv data
-
+if ~isfile('dados.mat')
+    csv_extraction('urlDataset.csv','dados')
+else
 dataSetDate = datevec(dir('urlDataset.csv').date);
 matfileDate = datevec(dir('dados.mat').date);
 
@@ -9,7 +11,7 @@ difMatFile = matfileDate(comparison);
 if (~isfile('dados.mat') || (difMatFile(1) < difDateSet(1))) 
     csv_extraction('urlDataset.csv','dados')
 end
-
+end
 vars = {'dataSetDate','matfileDate','comparison','difDateSet','difMatFile'};
 clear(vars{:})
 %Disclaimer: In case this is executed, it can take up to 3 minutes 
@@ -97,39 +99,118 @@ for i=1:length(Urls_BTr)
     end
 end
 
+
 %%
-%Fazer uma função para testar a dispersão da função de hash, no bloom
-%filter maligno por exemplo
+BF_malignteste = BloomInit(m_Malign);  % Bloom filter using BloomAdd1
+BF_malignteste2 = BloomInit(m_Malign); % Bloom filter using BloomAdd2
 
-urls = {
-    'https://example.com/page1',
-    'https://example.com/page2',
-    'https://example.com/page3',
-};
-
-figure;
-hold on;
-
-colors = lines(length(urls)); 
-
-for idx = 1:length(urls)
-    url = urls{idx};
-    hashValues = BloomCheck3(url, BF_malign2, kOtimoM);
-    
-    for j = 1:kOtimoM
-        stem(hashValues(j), idx, 'Color', colors(idx, :), 'LineWidth', 1.5);
-    end
+%Using BloomAdd1 (old version)
+for i = 1:length(Urls_MTr)
+    BF_malignteste = BloomAdd1(Urls_MTr{i}, BF_malignteste, kOtimoM);
 end
 
-title('Hash Value Dispersion for Similar URLs');
-xlabel('Bloom Filter Index');
-ylabel('URL Index');
-yticks(1:length(urls));
-yticklabels(urls);
-grid on;
-legend('Hash Values');
+%Using BloomAdd3
+for i = 1:length(Urls_MTr)
+    BF_malignteste2 = BloomAdd3(Urls_MTr{i}, BF_malignteste2, kOtimoM);
+end
 
-hold off;
+numRegions = 100;
+
+regionSize = floor(length(BF_malignteste) / numRegions);
+
+regionCounts1 = zeros(1, numRegions);
+regionCounts2 = zeros(1, numRegions);
+
+% Número de 1s por região
+for i = 1:numRegions
+    startIdx = (i-1)*regionSize + 1;
+    endIdx = min(i*regionSize, length(BF_malignteste)); 
+    
+    regionCounts1(i) = sum(BF_malignteste(startIdx:endIdx));
+    regionCounts2(i) = sum(BF_malignteste2(startIdx:endIdx));
+end
+
+figure(1);
+
+subplot(2,2,1);
+bar(regionCounts1, 'FaceColor', [0.2 0.6 0.8]); % BF_malign 
+title('Uniformidade do BF\_malign');
+xlabel('Região');
+ylabel('Número de 1s');
+grid on;
+
+subplot(2,2,2);
+bar(regionCounts2, 'FaceColor', [0.8 0.4 0.2]); % BF_malign2 
+title('Uniformidade do BF\_malign2');
+xlabel('Região');
+ylabel('Número de 1s');
+grid on;
+
+figure(2);
+subplot(2,1,2);
+bar(regionCounts2, 'FaceColor', [0.8 0.4 0.2]); % BF_malign2 
+title('Uniformidade do BF\_malign2');
+xlabel('Região');
+ylabel('Número de 1s');
+grid on;
+
+% Comparação de uniformidade das funções de hash - benign
+BF_benignteste = BloomInit(m_Benign);  % Bloom filter using BloomAdd1
+BF_benignteste2 = BloomInit(m_Benign); % Bloom filter using BloomAdd3
+
+%Using BloomAdd1 (old version)
+for i = 1:length(Urls_BTr)
+    BF_benignteste = BloomAdd1(Urls_BTr{i}, BF_benignteste, kOtimoB);
+end
+
+%Using BloomAdd3
+for i = 1:length(Urls_BTr)
+    BF_benignteste2 = BloomAdd3(Urls_BTr{i}, BF_benignteste2, kOtimoB);
+end
+
+
+numRegions = 100;
+
+regionSize = floor(length(BF_benignteste) / numRegions);
+
+regionCounts1 = zeros(1, numRegions);
+regionCounts2 = zeros(1, numRegions);
+
+% Número de 1s por região
+for i = 1:numRegions
+    startIdx = (i-1)*regionSize + 1;
+    endIdx = min(i*regionSize, length(BF_benignteste)); 
+    
+    regionCounts1(i) = sum(BF_benignteste(startIdx:endIdx));
+    regionCounts2(i) = sum(BF_benignteste2(startIdx:endIdx));
+end
+
+figure(1);
+
+subplot(2,2,3);
+bar(regionCounts1, 'FaceColor', [0.2 0.6 0.8]); % BF_benign 
+title('Uniformidade do BF\_benign');
+xlabel('Região');
+ylabel('Número de 1s');
+grid on;
+
+subplot(2,2,4);
+bar(regionCounts2, 'FaceColor', [0.8 0.4 0.2]); % BF_benign2
+title('Uniformidade do BF\_benign2');
+xlabel('Região');
+ylabel('Número de 1s');
+grid on;
+
+
+% Comparação de uniformidade das funções de hash - malign vs benign
+figure(2);
+subplot(2,1,1);
+bar(regionCounts2, 'FaceColor', [0.8 0.4 0.2]); % BF_benign2
+title('Uniformidade do BF\_benign2');
+xlabel('Região');
+ylabel('Número de 1s');
+grid on;
+
 
 %% Testing Bloom Filter
 % Testing Malign Bloom Filter only with malign URLs

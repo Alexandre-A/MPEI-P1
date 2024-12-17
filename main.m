@@ -6,7 +6,9 @@ else
 end
 %%
 % Automatization of the gather of csv data
-%CORRIGIR ORDEM DESTA PARTE
+if ~isfile('dados.mat')
+    csv_extraction(ficheiro,'dados')
+else
 dataSetDate = datevec(dir(ficheiro).date);
 matfileDate = datevec(dir('dados.mat').date);
 
@@ -16,7 +18,7 @@ difMatFile = matfileDate(comparison);
 if (~isfile('dados.mat') || (difMatFile(1) < difDateSet(1)))
     csv_extraction(ficheiro,'dados')
 end
-
+end
 vars = {'dataSetDate','matfileDate','comparison','difDateSet','difMatFile'};
 clear(vars{:})
 %Disclaimer: In case this is executed, it can take up to 3 minutes
@@ -135,27 +137,6 @@ for i = 1:N_urlsTeste
         else
             output_esperado = NaiveBayesOutput(i,non_zero_features,X_test,probsArray,probsArrayClasses,output_esperado,stats,'mixed',numeric_features);
         end
-
-        %{
-        probM = log(P_M);
-        probB = log(P_B);
-
-        for p = 1:length(non_zero_features)
-            index = non_zero_features(p);
-            if X_test(i, index) == 1
-                if index <= length(p_url_dado_M) && index <= length(p_url_dado_B)
-                    probM = probM + log(p_url_dado_M(index));
-                    probB = probB + log(p_url_dado_B(index));
-                end
-            end
-        end
-
-        if probM > probB
-            output_esperado = [output_esperado, 'malign'];
-        else
-            output_esperado = [output_esperado, 'benign'];
-        end
-        %}
     end
 end
 
@@ -203,7 +184,7 @@ clear(vars{:})
 %--------------------------------------------------------------------------%
 
 
-%% Obter Dados
+% Obter Dados
 
 load('dadosMH.mat','urls')
 
@@ -213,7 +194,7 @@ Set = fetchData(urls,shingLen);
 urlsize = length(urls);
 
 clear urls
-%% Calcular Matriz Assinaturas
+% Calcular Matriz Assinaturas
 tic
 
 K = 14;
@@ -224,19 +205,19 @@ toc
 
 clear Set
 
-%% Determinar Pares Candidatos
+% Determinar Pares Candidatos
 
 b = 7;
 r = 2;
 
 sigLSH = CriarLSH(urlsize,sig,b,r,K);
 
-%% POUPA ALGUMA MEMÓRIA
+% POUPA ALGUMA MEMÓRIA
 
 sigLSH = sparse(sigLSH);
 
 
-%% Encontrar Similares a uma entrada
+% Encontrar Similares a uma entrada
 
 % O valor do limiar foi calculado a partir da fórmula indica
 % no ponto 3.4.3 do livro Mining Massive Datasets
