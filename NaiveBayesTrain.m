@@ -27,6 +27,7 @@ end
     p_url_dado_M = (ocorrenciaM + 1) / (total_Malign + length(binary_features));
     p_url_dado_B = (ocorrenciaB + 1) / (total_Benign + length(binary_features));
 
+    % Gaussian features 
     if ~strcmp(mode,'None')
     meanM = mean(X_M(:, numeric_features), 1);
     stdM = std(X_M(:, numeric_features), 1);

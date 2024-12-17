@@ -1,7 +1,6 @@
 % minhash experiment
 
 %% Obtenção dos dados CSV
-%CORRIGIR ORDEM DESTA PARTE
 if ~isfile('dadosMH.mat')
     csv_extraction('urlDatasetMH.csv','dadosMH')
 else
@@ -23,7 +22,7 @@ clear(vars{:})
 
 
 
-%% Obter Dados
+% Obter Dados
 
 load('dadosMH.mat','urls')
 
@@ -44,14 +43,14 @@ toc
 
 clear Set
 
-%% Determinar Pares Candidatos
+% Determinar Pares Candidatos
 
 b = 7;
 r = 2;
 
 sigLSH = CriarLSH(urlsize,sig,b,r,K);
 
-%% POUPA ALGUMA MEMÓRIA
+% POUPA ALGUMA MEMÓRIA
 
 sigLSH = sparse(sigLSH);
 

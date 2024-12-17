@@ -162,7 +162,7 @@ clearvars
 
 %% Módulo MinHash
 
-%% Obtenção dos dados CSV - ADAPTADO PARA MINHASH, E COM O ERRO INICIAL RESOLVIDO
+% Obtenção dos dados CSV - ADAPTADO PARA MINHASH, E COM O ERRO INICIAL RESOLVIDO
 
 if ~isfile('dadosMH.mat')
     csv_extraction('urlDatasetMH.csv','dadosMH')
@@ -184,7 +184,7 @@ clear(vars{:})
 %--------------------------------------------------------------------------%
 
 
-%% Obter Dados
+% Obter Dados
 
 load('dadosMH.mat','urls')
 
@@ -194,7 +194,7 @@ Set = fetchData(urls,shingLen);
 urlsize = length(urls);
 
 clear urls
-%% Calcular Matriz Assinaturas
+% Calcular Matriz Assinaturas
 tic
 
 K = 14;
@@ -205,19 +205,19 @@ toc
 
 clear Set
 
-%% Determinar Pares Candidatos
+% Determinar Pares Candidatos
 
 b = 7;
 r = 2;
 
 sigLSH = CriarLSH(urlsize,sig,b,r,K);
 
-%% POUPA ALGUMA MEMÓRIA
+% POUPA ALGUMA MEMÓRIA
 
 sigLSH = sparse(sigLSH);
 
 
-%% Encontrar Similares a uma entrada
+% Encontrar Similares a uma entrada
 
 % O valor do limiar foi calculado a partir da fórmula indica
 % no ponto 3.4.3 do livro Mining Massive Datasets

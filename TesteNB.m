@@ -115,7 +115,7 @@ recall = (C(1))/ (C(1)+C(3))
 
 F1 = 2*precision2*recall/(precision2+recall)
 
-valuesOutputs = [valuesOutputs;accuracy precision2 recall F1];
+%valuesOutputs = [valuesOutputs;accuracy precision2 recall F1];
 %end
 %VALORES = round(valuesOutputs,4)
 %% Naive bayes algorithm -> Manual testing
