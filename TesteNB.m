@@ -126,10 +126,17 @@ writetable(dataTable, 'urlDatasetTest.csv');
 
 disp('CSV file created: urlDatasetTest.csv');
 
-if strcmp(versao,'1')
-system('python3 getDataManual.py');
+%Deve garantir funcionamento no windows e no linux
+if ispc == 1
+    cmd = 'python';
 else
-system('python3 getDataManualMixed.py');
+    cmd ='python3';
+end
+
+if strcmp(versao,'1')
+    system([cmd ' getDataManual.py']);
+else
+    system([cmd ' getDataManualMixed.py']);
 end
 
 
@@ -159,6 +166,8 @@ output_esperado2 = categorical(output_esperado2);
 erradas2 = sum(output_esperado2 ~= classes_test_manual)
 error_percent2 = erradas2/(length(classes_test_manual))
 
+% Disclaimer: se forem muito poucos urls de teste do utilizador, pode dar
+% erro na parte que se segue, não é algo desconhecido
 C2 = confusionmat(classes_test_manual,output_esperado2)
         
 accuracy2 = (C2(1) +C2(end))/ sum(C2(:))
