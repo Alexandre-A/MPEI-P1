@@ -24,8 +24,9 @@ if limiar ~= 0
         for indurl=1:length(firstURLResults)
             fprintf("%40s | %s\n",firstURLResults{indurl},string(firstCLASSresults(indurl)))
         end
-        fprintf("\n\tResultados <strong>acima</strong> de um limiar <strong>inferior</strong> ao desejado:\n%40s | CLASSE\n\n",'URL')
+        fprintf("\n\tResultados <strong>acima</strong> de um limiar <strong>inferior</strong> ao desejado:\n")
         fprintf("Limiar = %.3f\n",limiar);
+        fprintf("%40s | CLASSE\n\n",'URL')
          
         for indurl=1:(length(URLresults)-length(firstURLResults))
             fprintf("%40s | %s\n",URLresults{oldLimIndexes + indurl},string(CLASSresults(oldLimIndexes + indurl)))

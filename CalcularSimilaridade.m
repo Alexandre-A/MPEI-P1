@@ -4,7 +4,7 @@ b = size(sig,1);
 
 MS = zeros(1,datasize);
 
-bar2 = waitbar(0,['A calcular SIMILARIDADE para ' cell2mat(entry) '...']);
+bar2 = waitbar(0,['A calcular SIMILARIDADE para ' entry '...']);
 
 for icol = 1:datasize
     
@@ -17,8 +17,8 @@ for icol = 1:datasize
 
     end
     
-        if (mod(icol,1234) == 0)
-            waitbar(icol/datasize,bar2,['A calcular SIMILARIDADE para ' cell2mat(entry) '... icol1= ' num2str(icol)]);
+        if (mod(icol,12345) == 0)
+            waitbar(icol/datasize,bar2,['A calcular SIMILARIDADE para ' entry '... icol1= ' num2str(icol)]);
         end
 
 end
