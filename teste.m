@@ -100,7 +100,7 @@ for i=1:length(Urls_BTr)
 end
 
 
-%%
+%% Uniformidade de funções de hash
 BF_malignteste = BloomInit(m_Malign);  % Bloom filter using BloomAdd1
 BF_malignteste2 = BloomInit(m_Malign); % Bloom filter using BloomAdd2
 
