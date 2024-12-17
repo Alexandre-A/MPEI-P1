@@ -1,81 +1,31 @@
 % minhash experiment
-%% Funções
-function Set = fetchData(data, shingLen)
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
 
-% Pré-alocamos o total de linhas
-% para um aumento substancial de velocidade
-    Set = cell(length(data),1);
+%% Obtenção dos dados CSV
+%CORRIGIR ORDEM DESTA PARTE
+if ~isfile('dadosMH.mat')
+    csv_extraction('urlDatasetMH.csv','dadosMH')
+else
+    dataSetDate = datevec(dir('urlDatasetMH.csv').date);
+    matfileDate = datevec(dir('dadosMH.mat').date);
     
-    % Iterar por cada url
-    for indrow=1:length(data)
-        url = data{indrow};
-        lastIndex = length(url) - shingLen +1;
-        rowSet = cell(1,lastIndex);
-        
-        % Criação de shingles do URL
-        for indcol=1:lastIndex
-            rowSet{indcol} = url(indcol:indcol+shingLen-1);
-        end
-    
-        Set{indrow} = rowSet;
+    comparison = ~(dataSetDate == matfileDate);
+    difDateSet = dataSetDate(comparison);
+    difMatFile = matfileDate(comparison);
+    if difMatFile(1) < difDateSet(1)
+        csv_extraction('urlDatasetMH.csv','dadosMH')
     end
 end
+vars = {'dataSetDate','matfileDate','comparison','difDateSet','difMatFile'};
+clear(vars{:})
+%Disclaimer: In case this is executed, it can take up to 3 minutes
+% to load the entire dataset (max of 3 mins when we use the whole dataset)
+%--------------------------------------------------------------------------%
 
-function sig = calcMinHash(Set,datasize, K)
-
-    sig = Inf(K, datasize);
-    bar = waitbar(0,'running minhash...');
-    for k=1:K
-        waitbar(k/K,bar,'running minhash...');
-        for indurl=1:datasize
-            conteudo = Set{indurl};
-            for indelem=1:length(conteudo)
-                shingle = conteudo{indelem};
-                hash = hashy(shingle, 2^32-1,k);
-    
-                if hash < sig(k,indurl)
-                    sig(k,indurl) = hash;
-                end
-            end
-    
-            if (mod(indurl,12345) == 0)
-                waitbar(k/K,bar,['running minhash... k= ' num2str(k) ' url=' num2str(indurl)]);
-            end
-        end
-    end
-    delete(bar);
-
-end
-
-function sigLSH = CriarLSH(urlsize,sig,b,r,K)
-
-sigLSH = zeros(b,urlsize);
-prime = 986693;
-
-bar=waitbar(0,'A Preparar LSH...');
-for indurl=1:urlsize
-
-    ib = 1;
-    for indband=1:r:K
-        band=sig(indband:indband+r-1, indurl);
-        sigLSH(ib,indurl) = hashy(num2str(band(:)'),prime,1);
-        ib = ib +1;
-    end
-
-    if mod(indurl, 12345) == 0
-        waitbar(indurl/urlsize,bar, ['A Preparar LSH... indurl= ' num2str(indurl)]);
-    end
-end
-delete(bar)
-
-end
 
 
 %% Obter Dados
 
-load('dados.mat','urls')
+load('dadosMH.mat','urls')
 
 shingLen = 4;
 
@@ -88,13 +38,10 @@ tic
 
 K = 14;
 
-sig = calcMinHash(Set,urlsize,K);
+sig = CalcMinHash(Set,urlsize,K);
 
 toc
 
- % Por questões técnicas do matlab, antes de apagar a variável
- % "limpamos" todos os seus elementos para assegurar a libertação
- % de RAM!
 clear Set
 
 %% Determinar Pares Candidatos
@@ -109,58 +56,47 @@ sigLSH = CriarLSH(urlsize,sig,b,r,K);
 sigLSH = sparse(sigLSH);
 
 
-%% Encontrar Similares
+%% Encontrar Similares a uma entrada
 
-% colocamos url
-% passamos para Set
-% calculamos assinatura
-% comparamos similaridade iterando pelas sig's
-
-
+% O valor do limiar foi calculado a partir da fórmula indica
+% no ponto 3.4.3 do livro Mining Massive Datasets
 limiar = .4;
+% para b= 7 e r= 2, seguindo a formulação dada, temos (1/7)^(1/2)
 
-%urlNovo = 'https://web.whatsapp.com/';
 urlNovo = inputdlg("Insira um URL:");
 setNovo = fetchData(urlNovo, shingLen);
 
-MS = zeros(1,urlsize);
-
-bar2 = waitbar(0,['A calcular SIMILARIDADE de Jaccard para ' urlNovo '...']);
-
-sigNovo = calcMinHash(setNovo,length(urlNovo),K);
+sigNovo = CalcMinHash(setNovo,length(urlNovo),K);
 
 sigNovoLSH = CriarLSH(1,sigNovo,b,r,K);
 
-for icol = 1:urlsize
-
-    similaridade = sum(sigNovoLSH == sigLSH(:,icol))/b;
-
-    if similaridade ~= 0
-        MS(icol) = similaridade;
-    end
-
-    if (mod(icol,1234) == 0)
-        waitbar(icol/urlsize,bar2,['A calcular SIMILARIDADE de Jaccard para ' urlNovo '... icol1= ' num2str(icol)]);
-    end
-
-end
-delete(bar2)
+MS = CalcularSimilaridade(urlsize, sigNovoLSH, sigLSH, urlNovo);
 
 % Apresentar similares
 
-load('dados.mat','urls','classes');
+NumResultados = 3;
+
+oldLimiar = limiar;
+oldLimIndexes = sum(MS > limiar);
+novoLimiar = false;
+
+load('dadosMH.mat','urls','classes');
 urls = string(urls);
 
-INDsimilares = MS>limiar;
-URLresults = urls(INDsimilares);
-CLASSresults = classes(INDsimilares);
+[~,IndicesMSOrdenado] = sort(MS);
+IndicesResultsOrdenado = IndicesMSOrdenado(end:-1:end-NumResultados+1);
 
-totalResult = length(URLresults);
-
-fprintf("Expressão providenciada: %s\n\n\tResultados:\n%40s | CLASSE\n\n",cell2mat(urlNovo),'URL')
-
-for indurl=1:totalResult
-    fprintf("%40s | %s\n",URLresults{indurl},string(CLASSresults(indurl)))
+while sum(MS > limiar) < NumResultados || sum(MS > limiar) == 0
+    if novoLimiar == false
+        novoLimiar = true;
+    end
+    if limiar - 0.05 > 0
+        limiar = limiar - 0.05;
+    else
+        limiar = 0;
+        break
+    end
 end
-fprintf("\n\n")
 
+
+MostrarSimilares(IndicesResultsOrdenado,limiar,novoLimiar,oldLimiar,oldLimIndexes,urlNovo,urls,classes,NumResultados,MS)
