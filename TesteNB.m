@@ -24,15 +24,15 @@ clear(vars{:})
 % to load the entire dataset (max of 3 mins when we use the whole dataset)
 %--------------------------------------------------------------------------%
 
-%% Data splitting
-valuesOutputs = [];
-for i=1:10
+% Data splitting
+%valuesOutputs = [];
+%for i=1:10
 load('dados.mat')
 percent = 0.8;
 train_size = round(length(urls)*percent);
 shuffler = randperm(length(urls));
 
-%%
+%
 
 urls_train = urls(shuffler(1:train_size));
 urls_test = urls(shuffler(train_size:end));
@@ -54,9 +54,9 @@ Urls_BTst = urls_test(classes_test == 'malign');
 
 %------------------------------------------------------------------%
 
-%% NB implementation (preconditions)
+%% NB implementation (Training)
 
-% Teste NBB
+% Train NBB
 if strcmp(versao,'1')
 binary_features = 1:length(features);
 
@@ -65,15 +65,15 @@ binary_features = 1:length(features);
 
 else
 
-% Teste NBMisto
+% Train NBMisto
 numeric_features = [1,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
 binary_features = setdiff(1:length(features),numeric_features);
 
-% Log transformation (handles skewed data)
+% Log transformation 
 X_train(:, numeric_features) = log(X_train(:, numeric_features) + 1);
 X_test(:, numeric_features) = log(X_test(:, numeric_features) + 1);
 
-% Standardize features (zero mean, unit variance)
+% Standardize features 
 X_train(:, numeric_features) = zscore(X_train(:, numeric_features));
 X_test(:, numeric_features) = zscore(X_test(:, numeric_features));
 
@@ -109,9 +109,9 @@ recall = (C(1))/ (C(1)+C(3))
 F1 = 2*precision2*recall/(precision2+recall)
 
 valuesOutputs = [valuesOutputs;accuracy precision2 recall F1];
-end
-
-%%
+%end
+%VALORES = round(valuesOutputs,4)
+%% Naive bayes algorithm -> Manual testing
 
 [UrlOutput, ~, ~] = UrlInput('NB');
 dataTable = cell2table(UrlOutput, 'VariableNames', {'url','type'});
@@ -143,27 +143,6 @@ for i = 1:tamanho
     else
     output_esperado2 = NaiveBayesOutput(i,non_zero_features,X_test_manual,probsArray,probsArrayClasses,output_esperado2,stats,'mixed',numeric_features);
     end
-
-    %{
-    probM = log(P_M);
-    probB = log(P_B);
-
-    for p = 1:length(non_zero_features) 
-        index = non_zero_features(p);
-        if X_test_manual(i, index) == 1  
-            if index <= length(p_url_dado_M) && index <= length(p_url_dado_B) 
-                probM = probM + log(p_url_dado_M(index));  
-                probB = probB + log(p_url_dado_B(index));    
-            end  
-        end
-    end
-    
-    if probM > probB
-        output_esperado2 = [output_esperado2, 'malign'];
-    else
-        output_esperado2 = [output_esperado2, 'benign'];
-    end
-    %}
 end
 
 
