@@ -127,7 +127,7 @@ MS = zeros(1,urlsize);
 
 bar2 = waitbar(0,['A calcular SIMILARIDADE de Jaccard para ' urlNovo '...']);
 
-sigNovo = calcMinHash(setNovo,urlNovo,K);
+sigNovo = calcMinHash(setNovo,length(urlNovo),K);
 
 sigNovoLSH = CriarLSH(1,sigNovo,b,r,K);
 
