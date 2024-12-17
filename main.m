@@ -158,7 +158,6 @@ recall = (C(1))/ (C(1)+C(3))
 
 F1 = 2*precision*recall/(precision+recall)
 
-clearvars
 
 %% Módulo MinHash
 
@@ -186,7 +185,6 @@ clear(vars{:})
 
 % Obter Dados
 
-load('dadosMH.mat','urls')
 
 shingLen = 4;
 
@@ -219,21 +217,14 @@ sigLSH = sparse(sigLSH);
 
 % Encontrar Similares a uma entrada
 
-% O valor do limiar foi calculado a partir da fórmula indica
-% no ponto 3.4.3 do livro Mining Massive Datasets
-% para b= 7 e r= 2, seguindo a formulação dada, temos (1/7)^(1/2)
 
-urlNovo = inputdlg("Insira um URL (Deixe o campo vazio para terminar a inserção):");
-
-urlCell = {};
-
-while ~cellfun(@isempty,urlNovo)
-    urlCell{end+1} = cell2mat(urlNovo);
-    urlNovo = inputdlg("Insira um URL (Deixe o campo vazio para terminar a inserção):");
-end
-
-
-for url=urlCell
+urlCell = cellstr(urls_test(1:5)); %apenas testados 5 exemplos, para se conseguir ter output em tempo real
+verificacaoManual = {};
+index = 1;
+for url=urlCell'
+    % O valor do limiar foi calculado a partir da fórmula indica
+    % no ponto 3.4.3 do livro Mining Massive Datasets
+    % para b= 7 e r= 2, seguindo a formulação dada, temos (1/7)^(1/2)
 
     limiar = .4;
 
@@ -247,7 +238,7 @@ for url=urlCell
     
     % Apresentar similares
     
-    NumResultados = 3;
+    NumResultados = 2;
     
     oldLimiar = limiar;
     oldLimIndexes = sum(MS > limiar);
@@ -280,5 +271,13 @@ for url=urlCell
     % o array ordenado que precisas
     classArr = classes(IndicesResultsOrdenado);
 
-    % METE AQUI
+    if length(classArr) == 2 || length(classArr) == 1
+        if (output_esperado(index)~=classArr(1))
+            verificacaoManual{end+1} = url;
+        end        
+    end
+
+    index = index +1;
 end
+
+verificacaoManual

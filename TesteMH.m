@@ -1,6 +1,4 @@
-% MinHash Testing
-
-%% Módulo MinHash
+% Módulo MinHash
 
 %% Obtenção dos dados CSV - ADAPTADO PARA MINHASH, E COM O ERRO INICIAL RESOLVIDO
 
@@ -24,7 +22,7 @@ clear(vars{:})
 %--------------------------------------------------------------------------%
 
 
-%% Obter Dados
+%% Carregamento dos Dados
 
 load('dadosMH.mat','urls')
 
@@ -45,23 +43,20 @@ toc
 
 clear Set
 
-%% Determinar Pares Candidatos
+%% Criar Matriz LSH
 
 b = 7;
 r = 2;
 
 sigLSH = CriarLSH(urlsize,sig,b,r,K);
 
-%% POUPA ALGUMA MEMÓRIA
+% POUPA ALGUMA MEMÓRIA
 
 sigLSH = sparse(sigLSH);
 
 
 %% Encontrar Similares a uma entrada
 
-% O valor do limiar foi calculado a partir da fórmula indica
-% no ponto 3.4.3 do livro Mining Massive Datasets
-% para b= 7 e r= 2, seguindo a formulação dada, temos (1/7)^(1/2)
 
 urlNovo = inputdlg("Insira um URL (Deixe o campo vazio para terminar a inserção):");
 
@@ -75,6 +70,9 @@ end
 
 for url=urlCell
 
+    % O valor do limiar foi aproximada a partir da fórmula indicada
+    % no ponto 3.4.3 do livro Mining Massive Datasets
+    % para b= 7 e r= 2, seguindo a formulação dada, temos (1/7)^(1/2)
     limiar = .4;
 
     setNovo = fetchData(url, shingLen);
@@ -87,7 +85,7 @@ for url=urlCell
     
     % Apresentar similares
     
-    NumResultados = 3;
+    NumResultados = 2;
     
     oldLimiar = limiar;
     oldLimIndexes = sum(MS > limiar);
